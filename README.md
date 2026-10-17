@@ -155,8 +155,6 @@ source venv/bin/activate
 
 ### 3. Install Dependencies
 
-If a `requirements.txt` file is present:
-
 ```bash
 pip install -r requirements.txt
 ```
@@ -197,15 +195,12 @@ The application should initialize the vector store if it does not already exist.
 
 ### 6. Run the Application
 
-If your Streamlit entry point is `app.py`, run:
 
 ```bash
 streamlit run app.py
 ```
 
 Open the local URL displayed in your terminal to access the application.
-
-> **Note:** If your Streamlit entry point has a different filename, replace `app.py` with the appropriate filename.
 
 ## Usage
 
