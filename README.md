@@ -163,8 +163,6 @@ Create a `.env` file in the project root directory.
 
 Add your Groq API key using the environment variable expected by your application.
 
-For example, if your code uses `Groq_API_KEY`:
-
 ```env
 Groq_API_KEY=your_groq_api_key
 ```
@@ -177,13 +175,9 @@ You can obtain an API key through the official [Groq Console](https://console.gr
 
 ### 5. Run the Application
 
-If your Streamlit entry point is `app.py`, execute:
-
 ```bash
 streamlit run app.py
 ```
-
-If your entry point has a different filename, replace `app.py` with the appropriate filename.
 
 Streamlit will provide a local URL where you can access the application.
 
