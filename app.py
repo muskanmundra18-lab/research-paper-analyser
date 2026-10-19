@@ -36,5 +36,40 @@ def get_output(query):
 
 
 if uploaded_files and button:
-    answer = get_output(query)
-    st.write(answer)
+    if not query.strip():
+        st.warning("Please enter a question.")
+    else:
+        with st.spinner("Analysing your research papers..."):
+            try:
+                result = final_output(query)
+
+                st.subheader("Answer")
+                st.write(result["answer"])
+
+                with st.expander("Inspect retrieved context"):
+                    if result["sources"]:
+                        for i, doc in enumerate(result["sources"]):
+                            st.markdown(f"### Retrieved chunk {i + 1}")
+
+                            st.write(
+                                "Source:",
+                                doc["metadata"].get("source", "Unknown")
+                            )
+
+                            st.write(
+                                "Page:",
+                                doc["metadata"].get("page", "Unknown")
+                            )
+
+                            st.write(
+                                "Similarity:",
+                                round(doc["similarity_score"], 4)
+                            )
+
+                            st.write(doc["document"])
+                            st.divider()
+                    else:
+                        st.warning("No context was retrieved.")
+
+            except Exception as e:
+                st.error(f"An error occurred: {e}")

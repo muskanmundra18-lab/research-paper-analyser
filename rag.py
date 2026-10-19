@@ -83,7 +83,7 @@ class VectorStoreManager:
 
             document_content.append(doc.page_content)
 
-            embeddings_list.append(embeddings.tolist())
+            embeddings_list.append(embedding.tolist())
 
             self.collection.add(
                 ids=ids,
@@ -101,7 +101,7 @@ class RAGRetriever :
         self.embedding_manager = embedding_manager
         self.vector_store = vector_store
 
-    def retrieve(self, query, top_k=5, score_threshold=0.0):
+    def retrieve(self, query, top_k=5):
         query_embedding = self.embedding_manager.generate_embeddings(query[0])
 
         results = self.vector_store.collection.query(
@@ -117,17 +117,14 @@ class RAGRetriever :
             documents = results["documents"][0]
 
             for i, (id,metadata,distance,document) in enumerate(zip(ids,metadatas,distances,documents)):
-                similarity_score = 1-distance
 
-                if similarity_score>=score_threshold:
-                    retrieved_docs.append({
-                        "id":id,
-                        "metadata":metadata,
-                        "document":document,
-                        "distance":distance,
-                        "similarity_score":similarity_score,
-                        "rank":i+1        
-                    })
+                retrieved_docs.append({
+                    "id":id,
+                    "metadata":metadata,
+                    "document":document,
+                    "distance":distance,
+                    "rank":i+1        
+                })
 
             print(f"retrieved {len(retrieved_docs)} documents")
             
@@ -158,10 +155,13 @@ def generate_output(query, retriever, llm, top_k=5):
                     context:{context}
                     query:{query}"""
     response = llm.invoke([prompt.format(context=context, query=query)])
-    return response.content
+    return {
+        "answer": response.content,
+        "sources": results
+    }
 
 
-def final_output(query, top_k=5, score_threshold=0.0):
+def final_output(query, top_k=5):
     documents = pdf_loader()
     chunked_docs = chunkify(documents)
 
@@ -177,7 +177,12 @@ def final_output(query, top_k=5, score_threshold=0.0):
 
     rag_retriever = RAGRetriever(embedding_manager,vector_store_manager)
 
-    rag_retriever.retrieve(query, top_k=top_k, score_threshold=score_threshold)
-    answer = generate_output(query, rag_retriever, llm)
-
+    rag_retriever.retrieve(query, top_k=top_k)
+    answer = generate_output(
+        query,
+        rag_retriever,
+        llm,
+        top_k=top_k
+    )
+    
     return answer
