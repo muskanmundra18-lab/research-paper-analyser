@@ -1,3 +1,4 @@
+#Import Modules
 import os
 from langchain_community.document_loaders.pdf import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -6,6 +7,8 @@ import chromadb
 import uuid
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
+
+#Ingestion Pipeline 
 
 def pdf_loader():
     folder_path = "data/pdf"
@@ -95,6 +98,7 @@ class VectorStoreManager:
         print("total documents added in the vector store:", len(document_content))
         print("docs in collection:", self.collection.count())
 
+#Retrieval Pipeline 
 
 class RAGRetriever :
     def __init__(self, embedding_manager, vector_store):
@@ -133,6 +137,7 @@ class RAGRetriever :
             
         return retrieved_docs
 
+#Generation Pipeline
 
 load_dotenv()
 api_key = os.getenv("Groq_API_KEY")
@@ -157,52 +162,3 @@ def generate_output(query, retriever, llm, top_k=5):
     response = llm.invoke([prompt.format(context=context, query=query)])
     return response.content
 
-        
-def final_output(query, top_k=5):
-    embedding_manager = EmbeddingManager()
-    vector_store_manager = VectorStoreManager()
-    documents = pdf_loader()
-    chunked_docs = chunkify(documents)
-    texts = [doc.page_content for doc in chunked_docs]
-    embeddings = embedding_manager.generate_embeddings(texts)
-    vector_store_manager.add_to_store(chunked_docs, embeddings)
-    rag_retriever = RAGRetriever(embedding_manager,vector_store_manager)
-    rag_retriever.retrieve(query, top_k=top_k)
-    answer = generate_output(
-        query,
-        rag_retriever,
-        llm,
-        top_k=top_k
-    )
-    return answer
-
-
-def clear_vector_store():
-    persist_directory = "data/vector_store"
-    collection_name = "pdf_documents"
-
-    client = chromadb.PersistentClient(
-        path=persist_directory
-    )
-
-    try:
-        client.delete_collection(name=collection_name)
-        print("Old ChromaDB collection deleted.")
-    except Exception:
-        print("No existing collection to delete.")
-
-    print("Vector store cleared.")
-
-def clear_pdf_folder():
-    folder_path = "data/pdf"
-
-    os.makedirs(folder_path, exist_ok=True)
-
-    for filename in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, filename)
-
-        if filename.lower().endswith(".pdf") and os.path.isfile(file_path):
-            os.remove(file_path)
-            print(f"Deleted old PDF: {filename}")
-
-    print("PDF folder cleared.")
