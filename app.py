@@ -1,7 +1,7 @@
 import os
 import streamlit as st
 
-from backend import index_pdfs, final_output
+from backend import index_pdfs, final_output, clear_pdf_folder, clear_vector_store
 
 SAVE_DIR = "data/pdf"
 
@@ -82,3 +82,9 @@ if st.button("Answer..."):
 
         st.subheader("Answer")
         st.write(answer)
+
+new_chat = st.button("New Chat")
+
+if new_chat:
+    clear_vector_store()
+    clear_pdf_folder()

@@ -1,115 +1,111 @@
 # Scientific Research Paper Analyser
 
-**An AI-powered research assistant that lets you query scientific research papers and retrieve answers using Retrieval-Augmented Generation (RAG).**
+An AI-powered research paper analysis tool that allows users to upload PDF documents and ask questions about their content using **Retrieval-Augmented Generation (RAG)**.
 
-The Scientific Research Paper Analyser simplifies the process of understanding research papers by allowing users to upload PDF documents and ask questions about their contents. It retrieves relevant information from the uploaded papers and uses a Large Language Model (LLM) to generate contextual answers.
+Built with Streamlit, LangChain, Sentence Transformers, ChromaDB, and Groq, the application retrieves relevant information from uploaded research papers and uses a large language model to generate context-aware answers.
 
-Built using Python, Streamlit, Sentence Transformers, ChromaDB, and Groq, this project combines semantic search with generative AI to make scientific literature easier to explore.
+## Overview
 
----
+Reading and understanding lengthy research papers can be time-consuming. This project simplifies the process by allowing users to interact with research documents through natural-language questions.
+
+Instead of relying entirely on an LLM's pretrained knowledge, the application retrieves relevant text from the uploaded documents and uses that context to generate responses.
 
 ## Features
 
-* **PDF Document Processing:** Load and extract text from scientific research papers in PDF format.
-* **Intelligent Text Chunking:** Split lengthy documents into smaller, overlapping chunks for efficient retrieval.
-* **Semantic Search:** Generate vector embeddings to identify passages relevant to a user's query.
+* **PDF Upload:** Upload research papers and other PDF documents for analysis.
+* **Document Processing:** Extract text from PDFs and divide it into smaller chunks for efficient retrieval.
+* **Semantic Search:** Generate embeddings using Sentence Transformers to identify document passages relevant to a question.
 * **Vector Database:** Store and retrieve document embeddings using ChromaDB.
-* **AI-Powered Question Answering:** Use a Groq-hosted LLM to generate answers based on retrieved document context.
-* **Interactive Interface:** Upload research papers and ask questions through a Streamlit web application.
-* **Persistent Vector Storage:** Retain document embeddings locally between application sessions.
+* **Persistent Storage:** Preserve indexed document embeddings between application sessions.
+* **Context-Aware Q&A:** Ask questions in natural language and receive answers generated using relevant document context.
+* **LLM Integration:** Use Groq's inference API with the `openai/gpt-oss-120b` model for answer generation.
+* **Interactive Interface:** Upload documents and interact with the system through a Streamlit web application.
 
 ## Tech Stack
 
-| Technology                     | Purpose                                        |
-| ------------------------------ | ---------------------------------------------- |
-| Python                         | Core programming language                      |
-| Streamlit                      | Interactive web interface                      |
-| LangChain                      | PDF processing and text-splitting integrations |
-| PyPDFLoader                    | Extract text from PDF documents                |
-| RecursiveCharacterTextSplitter | Split documents into manageable chunks         |
-| Sentence Transformers          | Generate semantic embeddings                   |
-| `all-MiniLM-L6-v2`             | Text embedding model                           |
-| ChromaDB                       | Persistent vector database                     |
-| LangChain Groq                 | Integration with Groq-hosted language models   |
-| `openai/gpt-oss-120b`          | Large Language Model for answer generation     |
-| python-dotenv                  | Load environment variables securely            |
+| Component             | Technology                     |
+| --------------------- | ------------------------------ |
+| Programming Language  | Python                         |
+| Frontend              | Streamlit                      |
+| PDF Processing        | PyPDFLoader                    |
+| Text Splitting        | RecursiveCharacterTextSplitter |
+| Embedding Model       | `all-MiniLM-L6-v2`             |
+| Vector Database       | ChromaDB                       |
+| LLM Inference         | Groq API                       |
+| LLM                   | `openai/gpt-oss-120b`          |
+| Framework             | LangChain                      |
+| Environment Variables | python-dotenv                  |
 
 ## How It Works
 
-The application follows a Retrieval-Augmented Generation (RAG) pipeline.
-
-```mermaid
-flowchart TD
-    A[Upload Research Papers] --> B[Extract Text from PDFs]
-    B --> C[Split Text into Chunks]
-    C --> D[Generate Embeddings]
-    D --> E[Store Vectors in ChromaDB]
-
-    F[User Question] --> G[Generate Query Embedding]
-    G --> H[Retrieve Relevant Chunks]
-    E --> H
-
-    H --> I[Build Context]
-    I --> J[Groq LLM]
-    J --> K[Generate Answer]
-    K --> L[Display Answer in Streamlit]
-```
-
-### Pipeline Breakdown
-
-**1. Document Ingestion**
-
-Research papers are loaded from PDF files using `PyPDFLoader`, which extracts their textual content.
-
-**2. Text Chunking**
-
-The extracted text is divided into smaller chunks using `RecursiveCharacterTextSplitter`.
-
-Current configuration:
-
-* Chunk size: 500 characters
-* Chunk overlap: 50 characters
-
-Overlapping chunks help preserve context across chunk boundaries.
-
-**3. Embedding Generation**
-
-The `all-MiniLM-L6-v2` model converts text chunks into numerical vector representations that capture semantic meaning.
-
-**4. Vector Storage**
-
-The generated embeddings and associated document information are stored in a persistent ChromaDB collection named `pdf_documents`.
-
-**5. Semantic Retrieval**
-
-When a user submits a question, the system retrieves relevant document chunks using vector similarity search.
-
-**6. Answer Generation**
-
-The retrieved context is passed to a Groq-hosted LLM, which generates a response based on the available information.
-
-**7. Interactive Results**
-
-The generated answer is presented through the Streamlit interface.
-
-## Project Structure
-
-The application uses a modular Python structure. The following is the expected layout; adjust the filenames if your repository differs.
+The application follows a Retrieval-Augmented Generation pipeline.
 
 ```text
-research-paper-analyser/
-│
-├── app.py                  # Streamlit application entry point
-├── rag.py                  # RAG pipeline and document processing
-├── data/
-│   ├── pdf/                # Input research papers
-│   └── vector_store/       # Persistent ChromaDB storage
-│
-├── .env                    # Environment variables (not committed)
-├── .gitignore
-├── requirements.txt        # Python dependencies
-└── README.md
+             PDF Upload
+                  |
+                  v
+          PDF Text Extraction
+                  |
+                  v
+            Text Splitting
+                  |
+                  v
+          Generate Embeddings
+                  |
+                  v
+          Store in ChromaDB
+                  |
+                  v
+        User Enters a Question
+                  |
+                  v
+       Generate Query Embedding
+                  |
+                  v
+       Retrieve Relevant Chunks
+                  |
+                  v
+       Construct Context + Query
+                  |
+                  v
+          Groq LLM Inference
+                  |
+                  v
+          Generate Final Answer
 ```
+
+### 1. Document Ingestion
+
+Uploaded PDFs are processed using LangChain's `PyPDFLoader` to extract their textual content.
+
+The extracted text is divided into smaller chunks using `RecursiveCharacterTextSplitter`, with the following configuration:
+
+* **Chunk size:** 500 characters
+* **Chunk overlap:** 50 characters
+
+Chunking allows the application to retrieve focused sections of a research paper instead of processing the entire document for every question.
+
+### 2. Embedding Generation
+
+Each document chunk is converted into a numerical vector using the Sentence Transformers model:
+
+`all-MiniLM-L6-v2`
+
+These embeddings represent the semantic meaning of the text and allow the application to retrieve relevant passages based on meaning rather than exact keyword matches.
+
+### 3. Vector Storage and Retrieval
+
+The generated embeddings are stored in a persistent ChromaDB collection named `pdf_documents`.
+
+When a user submits a question, the system searches the vector database for relevant document chunks.
+
+This retrieval step supplies the LLM with information from the uploaded research papers.
+
+### 4. Answer Generation
+
+The retrieved document context and the user's question are passed to a Groq-hosted language model.
+
+The model generates a response using the retrieved information, allowing users to explore the contents of their research papers interactively.
 
 ## Getting Started
 
@@ -117,8 +113,8 @@ Follow these steps to run the project locally.
 
 ### Prerequisites
 
-* Python 3.10 or a compatible version supported by your dependencies
-* pip
+* Python 3.10 or a compatible version supported by the dependencies
+* Git
 * A Groq API key
 
 ### 1. Clone the Repository
@@ -139,7 +135,7 @@ cd research-paper-analyser
 python -m venv venv
 ```
 
-Activate it.
+Activate the environment.
 
 **Windows:**
 
@@ -155,135 +151,119 @@ source venv/bin/activate
 
 ### 3. Install Dependencies
 
+Install the required Python packages:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-Otherwise, install the required packages:
-
-```bash
-pip install streamlit langchain-community langchain-text-splitters sentence-transformers chromadb python-dotenv langchain-groq pypdf
-```
-
 ### 4. Configure Environment Variables
 
-Create a `.env` file in the project root directory and add your Groq API key:
+Create a `.env` file in the project root directory.
+
+Add your Groq API key using the environment variable expected by your application.
+
+For example, if your code uses `Groq_API_KEY`:
 
 ```env
 Groq_API_KEY=your_groq_api_key
 ```
 
-Replace `your_groq_api_key` with your actual API key.
+Replace the placeholder with your actual API key.
 
-**Security note:** Never commit your `.env` file or expose your API key in source code.
+You can obtain an API key through the official [Groq Console](https://console.groq.com/).
 
-Ensure your application loads the environment variables using `python-dotenv`.
+**Security note:** Never commit your `.env` file or expose your API key in your source code.
 
-### 5. Prepare the Data Directory
+### 5. Run the Application
 
-Create the directory used to store research papers:
-
-```text
-data/
-├── pdf/
-└── vector_store/
-```
-
-Place your research paper PDFs inside `data/pdf/`.
-
-The application should initialize the vector store if it does not already exist.
-
-### 6. Run the Application
-
+If your Streamlit entry point is `app.py`, execute:
 
 ```bash
 streamlit run app.py
 ```
 
-Open the local URL displayed in your terminal to access the application.
+If your entry point has a different filename, replace `app.py` with the appropriate filename.
+
+Streamlit will provide a local URL where you can access the application.
 
 ## Usage
 
-1. Launch the application.
-2. Place your research paper PDFs in the configured input directory.
-3. Allow the application to process the documents and generate embeddings.
-4. Enter a question related to the uploaded research papers.
+1. Start the Streamlit application.
+2. Upload one or more research paper PDFs through the interface.
+3. Allow the documents to be processed and indexed.
+4. Enter a question about the uploaded research material.
 5. Submit the question.
-6. Review the answer generated from the retrieved document context.
+6. Review the generated answer.
 
 ### Example Questions
 
-You can use questions such as:
+You can ask questions such as:
 
-* What is the primary objective of this research paper?
+* What is the main objective of this research paper?
 * Which methodology does the paper propose?
-* What datasets were used in the study?
-* What are the key findings of the research?
+* What are the key findings?
+* Which algorithms or models are used?
 * What limitations do the authors identify?
-* How does the proposed approach compare with the existing methods discussed in the paper?
+* Explain the proposed approach in simple terms.
+* What conclusions can be drawn from the research?
 
-The quality of the answers depends on the information extracted from the PDFs and the relevance of the retrieved passages.
+The answers depend on the quality of the extracted text, the retrieved document chunks, and the language model's interpretation of the supplied context.
 
-## Configuration
+## Project Structure
 
-The current RAG pipeline uses the following configuration:
+The following is an illustrative structure for the application. Adapt the filenames to match your repository.
 
-| Parameter         | Value                 |
-| ----------------- | --------------------- |
-| Embedding model   | `all-MiniLM-L6-v2`    |
-| Chunk size        | 500 characters        |
-| Chunk overlap     | 50 characters         |
-| Vector database   | ChromaDB              |
-| Collection name   | `pdf_documents`       |
-| Vector store path | `data/vector_store`   |
-| LLM provider      | Groq                  |
-| LLM model         | `openai/gpt-oss-120b` |
-
-These values can be adjusted in the relevant configuration or pipeline code.
+```text
+research-paper-analyser/
+│
+├── app.py                  # Streamlit application
+├── rag.py                  # RAG pipeline and retrieval logic
+├── backend.py              # Backend for the app
+├── requirements.txt        # Python dependencies
+├── .env                    # API credentials (not committed)
+├── .gitignore
+│
+└── data/
+    ├── pdf/                # Uploaded PDF documents
+    └── vector_store/       # Persistent ChromaDB data
+```
 
 ## Key Concepts Demonstrated
 
-This project demonstrates practical implementation of several AI engineering concepts:
+This project demonstrates practical implementation of several concepts in modern AI application development:
 
 * Retrieval-Augmented Generation (RAG)
-* Text preprocessing and document chunking
-* Dense vector embeddings
-* Semantic similarity search
-* Vector database management
-* LLM-based question answering
-* Integration of open-source embedding models with hosted LLMs
-* Building AI applications with Streamlit
+* Semantic search and vector embeddings
+* Document ingestion and preprocessing
+* Vector database integration
+* Large Language Model (LLM) inference
+* Prompt construction using retrieved context
+* Persistent vector storage
+* Building interactive AI applications with Streamlit
+* Managing API credentials through environment variables
+
+## Potential Improvements
+
+Future enhancements could include:
+
+* Displaying source documents and page references for generated answers.
+* Supporting document-specific retrieval when multiple PDFs are uploaded.
+* Improving retrieval with metadata filtering and reranking.
+* Adding conversation history for follow-up questions.
+* Supporting scanned PDFs through OCR.
+* Evaluating retrieval quality and answer faithfulness.
+* Adding automated tests for document ingestion and retrieval.
 
 ## Limitations
 
-* **PDF extraction:** Scanned PDFs and documents with complex layouts may require OCR or specialized document parsers.
-* **Context limitations:** Answer quality depends on the relevance and completeness of retrieved text chunks.
-* **Hallucinations:** The language model may produce incorrect information if the retrieved context is insufficient.
-* **Persistence management:** Reprocessing the same documents without deduplication can create duplicate entries in the vector database.
-* **Source verification:** Answers should be checked against the original research papers, particularly for scientific claims and numerical results.
-* **Document scope:** The system can only answer questions about information available in the documents it processes.
+* Answer quality depends on the relevance of retrieved document chunks.
+* Scanned PDFs may require OCR if they do not contain extractable text.
+* An LLM may generate incorrect information if the retrieved context is insufficient or ambiguous.
+* The application requires a valid Groq API key for model inference.
+* Persistent vector storage requires appropriate handling when documents are replaced or deleted.
 
-## Future Improvements
-
-Potential enhancements include:
-
-* **Source citations:** Display the PDF filename and page number supporting each answer.
-* **Multi-document analysis:** Compare findings and methodologies across multiple research papers.
-* **Hybrid retrieval:** Combine semantic search with keyword-based retrieval.
-* **Reranking:** Improve retrieval quality by reranking candidate passages before generating answers.
-* **Conversation history:** Support follow-up questions that depend on previous interactions.
-* **Evaluation:** Measure retrieval relevance and answer quality using a dedicated RAG evaluation framework.
-* **Improved document parsing:** Support tables, mathematical expressions, and scanned documents.
-* **Evidence-aware responses:** Detect insufficient context and avoid generating unsupported answers.
-
-## Contributing
-
-Contributions, suggestions, and bug reports are welcome.
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Implement and test your changes.
-4. Submit a pull request describing your improvements.
+For research and academic work, verify important claims against the original paper rather than treating generated answers as authoritative.
 
 ## Author
 
@@ -294,4 +274,4 @@ Contributions, suggestions, and bug reports are welcome.
 
 ---
 
-*Built to make scientific literature more accessible through Retrieval-Augmented Generation and Large Language Models.*
+*Built to make exploring scientific research papers faster and more interactive using Retrieval-Augmented Generation.*
