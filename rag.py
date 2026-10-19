@@ -155,28 +155,18 @@ def generate_output(query, retriever, llm, top_k=5):
                     context:{context}
                     query:{query}"""
     response = llm.invoke([prompt.format(context=context, query=query)])
-    return {
-        "answer": response.content,
-        "sources": results
-    }
+    return response.content
 
-
+        
 def final_output(query, top_k=5):
+    embedding_manager = EmbeddingManager()
+    vector_store_manager = VectorStoreManager()
     documents = pdf_loader()
     chunked_docs = chunkify(documents)
-
-    embedding_manager = EmbeddingManager()
-
-    vector_store_manager = VectorStoreManager()
-
     texts = [doc.page_content for doc in chunked_docs]
-
     embeddings = embedding_manager.generate_embeddings(texts)
-
-    vector_store = vector_store_manager.add_to_store(chunked_docs, embeddings)
-
+    vector_store_manager.add_to_store(chunked_docs, embeddings)
     rag_retriever = RAGRetriever(embedding_manager,vector_store_manager)
-
     rag_retriever.retrieve(query, top_k=top_k)
     answer = generate_output(
         query,
@@ -184,5 +174,35 @@ def final_output(query, top_k=5):
         llm,
         top_k=top_k
     )
-    
     return answer
+
+
+def clear_vector_store():
+    persist_directory = "data/vector_store"
+    collection_name = "pdf_documents"
+
+    client = chromadb.PersistentClient(
+        path=persist_directory
+    )
+
+    try:
+        client.delete_collection(name=collection_name)
+        print("Old ChromaDB collection deleted.")
+    except Exception:
+        print("No existing collection to delete.")
+
+    print("Vector store cleared.")
+
+def clear_pdf_folder():
+    folder_path = "data/pdf"
+
+    os.makedirs(folder_path, exist_ok=True)
+
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+
+        if filename.lower().endswith(".pdf") and os.path.isfile(file_path):
+            os.remove(file_path)
+            print(f"Deleted old PDF: {filename}")
+
+    print("PDF folder cleared.")

@@ -1,6 +1,6 @@
 import os
 import streamlit as st
-from rag import final_output
+from rag import final_output, clear_pdf_folder, clear_vector_store
 SAVE_DIR = "data/pdf"
 
 if not os.path.exists(SAVE_DIR):
@@ -24,15 +24,11 @@ if uploaded_files:
 
 
 query = st.text_input(
-    label="What do you want to ask?", 
+    label="Ask about your research paper", 
     placeholder="Enter your query..."
 )
 
-button = st.button("Answer...")
-
-def get_output(query):
-    answer = final_output(query)
-    return answer
+button = st.button("Answer")
 
 
 if uploaded_files and button:
@@ -44,32 +40,13 @@ if uploaded_files and button:
                 result = final_output(query)
 
                 st.subheader("Answer")
-                st.write(result["answer"])
-
-                with st.expander("Inspect retrieved context"):
-                    if result["sources"]:
-                        for i, doc in enumerate(result["sources"]):
-                            st.markdown(f"### Retrieved chunk {i + 1}")
-
-                            st.write(
-                                "Source:",
-                                doc["metadata"].get("source", "Unknown")
-                            )
-
-                            st.write(
-                                "Page:",
-                                doc["metadata"].get("page", "Unknown")
-                            )
-
-                            st.write(
-                                "Similarity:",
-                                round(doc["similarity_score"], 4)
-                            )
-
-                            st.write(doc["document"])
-                            st.divider()
-                    else:
-                        st.warning("No context was retrieved.")
+                st.write(result)
 
             except Exception as e:
                 st.error(f"An error occurred: {e}")
+
+new_chat = st.button("New Chat")
+
+if new_chat:
+    clear_vector_store()
+    clear_pdf_folder()
